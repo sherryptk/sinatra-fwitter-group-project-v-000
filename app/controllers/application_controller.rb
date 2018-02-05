@@ -11,7 +11,6 @@ class ApplicationController < Sinatra::Base
 
   # HOME PAGE
   get '/' do
-
     erb :index
   end
 
@@ -30,8 +29,6 @@ class ApplicationController < Sinatra::Base
     else
       @tweet = current_user.tweets.create(:content=> params["content"])
       id = @tweet.id
-
-      @tweet.save
       redirect to "/tweets/#{id}"
     end
   end
@@ -39,7 +36,7 @@ class ApplicationController < Sinatra::Base
   # SHOW TWEET
   get '/tweets/:id' do
     if logged_in?
-      @tweet = Tweet.all.find(params[:id])
+      @tweet = current_tweet
       erb :'/tweets/show_tweet'
     else
       redirect to '/login'
@@ -49,7 +46,7 @@ class ApplicationController < Sinatra::Base
   # EDIT TWEET
   get '/tweets/:id/edit' do
     if logged_in?
-      @tweet = Tweet.all.find(params[:id])
+      @tweet = current_tweet
       erb :'tweets/edit_tweet'
     else
       redirect to '/login'
@@ -57,7 +54,7 @@ class ApplicationController < Sinatra::Base
   end
 
   patch '/tweets/:id' do
-    @tweet = Tweet.all.find(params[:id])
+    @tweet = current_tweet
     id = @tweet.id
 
     if params[:content] == ""
@@ -71,7 +68,7 @@ class ApplicationController < Sinatra::Base
 
   # DELETE TWEET
   delete '/tweets/:id/delete' do
-    @tweet = Tweet.all.find(params[:id])
+    @tweet = current_tweet
     if logged_in? && current_user.id == @tweet.user.id
       @tweet.destroy
       redirect to "/tweets"
@@ -142,6 +139,10 @@ class ApplicationController < Sinatra::Base
 
     def current_user
       User.find(session[:user_id])
+    end
+
+    def current_tweet
+      Tweet.all.find(params[:id])
     end
   end
 
